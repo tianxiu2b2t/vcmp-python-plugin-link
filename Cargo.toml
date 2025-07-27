@@ -1,0 +1,11 @@
+[package]
+name = "vcmp-python-plugin-link"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libloading = "0.8.8"
+pyo3 = { version = "0.25.1", features = ["abi3"] }
+
+[lib]
+crate-type = ["cdylib"]
