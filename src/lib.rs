@@ -1,5 +1,6 @@
 use std::{
     ffi::CStr,
+    fmt::Display,
     sync::{Arc, OnceLock},
 };
 
@@ -13,6 +14,7 @@ pub mod raw;
 
 pub static LIBRARY: OnceLock<Arc<Library>> = OnceLock::new();
 pub static ORIGIN_SERVER_INIT: OnceLock<Option<unsafe extern "C" fn() -> u8>> = OnceLock::new();
+pub static PY_VERSION: OnceLock<PyVersion> = OnceLock::new();
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const PROJECT_NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -39,6 +41,21 @@ impl From<String> for PyVersion {
         }
     }
 }
+impl Display for PyVersion {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                PyVersion::Py3_10 => "3.10.x",
+                PyVersion::Py3_11 => "3.11.x",
+                PyVersion::Py3_12 => "3.12.x",
+                PyVersion::Py3_13 => "3.13.x",
+                PyVersion::Unknown(version) => version,
+            }
+        )
+    }
+}
 
 impl PyVersion {
     pub fn to_version(&self) -> &'static str {
@@ -54,7 +71,10 @@ impl PyVersion {
 
 #[unsafe(no_mangle)]
 extern "C" fn server_init() -> u8 {
-    println!("{PROJECT_NAME} loader version: {VERSION} by tianxiu2b2t");
+    println!(
+        "{PROJECT_NAME} loaded with version {VERSION} on Python {} by tianxiu2b2t",
+        PY_VERSION.get().unwrap()
+    );
     let origin = *ORIGIN_SERVER_INIT.get().unwrap();
     match origin {
         Some(origin) => unsafe { origin() },
@@ -73,6 +93,8 @@ extern "C" fn VcmpPluginInit(
             .to_string_lossy()
             .to_string()
     });
+
+    PY_VERSION.set(py_version.clone()).unwrap();
 
     let version = match py_version {
         PyVersion::Unknown(version) => {
