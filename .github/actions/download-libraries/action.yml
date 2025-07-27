@@ -32,7 +32,7 @@ runs:
 
         # 处理 Windows DLL 文件
         for file in ./tmp_libraries/**/*.dll; do
-          if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
+          if [[ $file =~ libraries_windows-latest_x64; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             version="${major}${minor}"
@@ -43,7 +43,7 @@ runs:
 
         # 处理 Linux SO 文件
         for file in ./tmp_libraries/**/*.so; do
-          if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
+          if [[ $file =~ libraries_ubuntu-22.04_x64; then
             major="${BASH_REMATCH[1]}"
             minor="${BASH_REMATCH[2]}"
             version="${major}${minor}"
