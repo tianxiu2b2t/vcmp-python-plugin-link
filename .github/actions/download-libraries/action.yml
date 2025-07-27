@@ -32,23 +32,15 @@ runs:
 
         # 处理 Windows DLL 文件
         for file in ./tmp_libraries/**/*.dll; do
-          if [[ $file =~ libraries_windows-latest_x64; then
-            major="${BASH_REMATCH[1]}"
-            minor="${BASH_REMATCH[2]}"
-            version="${major}${minor}"
-            new_name="pythonlink04rel64.dll"
-            cp "$file" "${{ inputs.output_target }}/$new_name"
+          if [[ $file =~ libraries_windows-latest_x64 ]]; then
+            cp "$file" "${{ inputs.output_target }}/pythonlink04rel64.dll"
           fi
         done
 
         # 处理 Linux SO 文件
         for file in ./tmp_libraries/**/*.so; do
-          if [[ $file =~ libraries_ubuntu-22.04_x64; then
-            major="${BASH_REMATCH[1]}"
-            minor="${BASH_REMATCH[2]}"
-            version="${major}${minor}"
-            new_name="pythonlink04rel64.so"
-            cp "$file" "${{ inputs.output_target }}/$new_name"
+          if [[ $file =~ libraries_ubuntu-22.04_x64 ]]; then
+            cp "$file" "${{ inputs.output_target }}/pythonlink04rel64.so"
           fi
         done
 
