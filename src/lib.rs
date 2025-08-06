@@ -1,7 +1,5 @@
 use std::{
-    ffi::CStr,
-    fmt::Display,
-    sync::{Arc, OnceLock},
+    ffi::CStr, fmt::Display, path::absolute, sync::{Arc, OnceLock}
 };
 
 use libloading::Library;
@@ -115,8 +113,23 @@ extern "C" fn VcmpPluginInit(
     let plugin_file = cfg.filename_format.replace("{py_version}", version);
     let plugin_path = cfg.dir.join(plugin_file);
 
+    // relative path
+    let path = match absolute(plugin_path) {
+        Ok(path) => path,
+        Err(e) => {
+            println!("Failed to get absolute path: {e}");
+            return 0;
+        }
+    };
+
     let res = unsafe {
-        let lib = Arc::new(libloading::Library::new(plugin_path).unwrap());
+        let lib = Arc::new(match libloading::Library::new(&path) {
+            Ok(lib) => lib,
+            Err(e) => {
+                println!("Library path: '{}', failed to load library: {e}", path.display());
+                return 0;
+            }
+        });
         LIBRARY.set(lib.clone()).unwrap();
         let plugin_funcs: libloading::Symbol<
             fn(*mut PluginFuncs, *mut PluginCallbacks, *mut PluginInfo) -> u32,
